@@ -25,6 +25,7 @@ public class SimUtils {
 		return (int)(fraction + start);
 	}
 
+
 	public static double getRandomDoubleNumber(double start, double end) {
 		//return pd.sample();
 		double range = end - start;

@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import edu.boun.edgecloudsim.mobility.MobilityModel;
+import edu.boun.edgecloudsim.mobility.RoadNode;
+import edu.boun.edgecloudsim.mobility.VehicularMobility;
 import org.cloudbus.cloudsim.CloudletSchedulerTimeShared;
 import org.cloudbus.cloudsim.Datacenter;
 import org.cloudbus.cloudsim.DatacenterCharacteristics;
@@ -171,9 +174,10 @@ public class DefaultEdgeServerManager extends EdgeServerManager{
 		
 		Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
 		String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
+		VehicularMobility mobilityModel = (VehicularMobility) SimManager.getInstance().getMobilityModel();
 		int wlan_id = Integer.parseInt(location.getElementsByTagName("wlan_id").item(0).getTextContent());
-		int x_pos = Integer.parseInt(location.getElementsByTagName("x_pos").item(0).getTextContent());
-		int y_pos = Integer.parseInt(location.getElementsByTagName("y_pos").item(0).getTextContent());
+		int nodeId = Integer.parseInt(location.getElementsByTagName("node_id").item(0).getTextContent());
+		RoadNode roadNodeById = mobilityModel.getRoadNodeById(nodeId);
 		int placeTypeIndex = Integer.parseInt(attractiveness);
 
 		NodeList hostNodeList = datacenterElement.getElementsByTagName("host");
@@ -208,7 +212,7 @@ public class DefaultEdgeServerManager extends EdgeServerManager{
 					new VmSchedulerSpaceShared(peList)
 				);
 			
-			host.setPlace(new Location(placeTypeIndex, wlan_id, x_pos, y_pos));
+			host.setPlace(new Location(placeTypeIndex, wlan_id, roadNodeById.getX(), roadNodeById.getY()));
 			hostList.add(host);
 			hostIdCounter++;
 		}

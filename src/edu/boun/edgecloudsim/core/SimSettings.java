@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,6 +33,8 @@ import edu.boun.edgecloudsim.utils.SimLogger;
 public class SimSettings {
 	private static SimSettings instance = null;
 	private Document edgeDevicesDoc = null;
+
+	private Document roadNodesDoc = null;
 
 	public static final double CLIENT_ACTIVITY_START_TIME = 10;
 
@@ -49,6 +52,7 @@ public class SimSettings {
 
 	//delimiter for output file.
 	public static final String DELIMITER = ";";
+
 
 	private double SIMULATION_TIME; //minutes unit in properties file
 	private double WARM_UP_PERIOD; //minutes unit in properties file
@@ -96,9 +100,6 @@ public class SimSettings {
 	private double SOUTHERN_BOUND;
 	private double WESTERN_BOUND;
 
-	// mean waiting time (minute) is stored for each place types
-	private double[] mobilityLookUpTable;
-
 	// following values are stored for each applications defined in applications.xml
 	// [0] usage percentage (%)
 	// [1] prob. of selecting cloud (%)
@@ -133,7 +134,7 @@ public class SimSettings {
 	 * @param propertiesFile
 	 * @return
 	 */
-	public boolean initialize(String propertiesFile, String edgeDevicesFile, String applicationsFile){
+	public boolean initialize(String propertiesFile, String edgeDevicesFile, String applicationsFile, String roadNodesFile) {
 		boolean result = false;
 		InputStream input = null;
 		try {
@@ -185,18 +186,6 @@ public class SimSettings {
 			EASTERN_BOUND = Double.parseDouble(prop.getProperty("eastern_bound", "0"));
 			WESTERN_BOUND = Double.parseDouble(prop.getProperty("western_bound", "0"));
 
-			//avg waiting time in a place (min)
-			double place1_mean_waiting_time = Double.parseDouble(prop.getProperty("attractiveness_L1_mean_waiting_time"));
-			double place2_mean_waiting_time = Double.parseDouble(prop.getProperty("attractiveness_L2_mean_waiting_time"));
-			double place3_mean_waiting_time = Double.parseDouble(prop.getProperty("attractiveness_L3_mean_waiting_time"));
-
-			//mean waiting time (minute)
-			mobilityLookUpTable = new double[]{
-					place1_mean_waiting_time, //ATTRACTIVENESS_L1
-					place2_mean_waiting_time, //ATTRACTIVENESS_L2
-					place3_mean_waiting_time  //ATTRACTIVENESS_L3
-			};
-
 
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -212,6 +201,7 @@ public class SimSettings {
 		}
 		parseApplicationsXML(applicationsFile);
 		parseEdgeDevicesXML(edgeDevicesFile);
+		parseRoadNodesXML(roadNodesFile);
 
 		return result;
 	}
@@ -221,6 +211,10 @@ public class SimSettings {
 	 */
 	public Document getEdgeDevicesDocument(){
 		return edgeDevicesDoc;
+	}
+
+	public Document getRoadDocument(){
+		return roadNodesDoc;
 	}
 
 
@@ -526,10 +520,6 @@ public class SimSettings {
 	 * returns mobility characteristic within an array
 	 * the result includes mean waiting time (minute) or each place type
 	 */ 
-	public double[] getMobilityLookUpTable()
-	{
-		return mobilityLookUpTable;
-	}
 
 	/**
 	 * returns application characteristic within two dimensional array
@@ -695,8 +685,7 @@ public class SimSettings {
 				Element location = (Element)datacenterElement.getElementsByTagName("location").item(0);
 				isElementPresent(location, "attractiveness");
 				isElementPresent(location, "wlan_id");
-				isElementPresent(location, "x_pos");
-				isElementPresent(location, "y_pos");
+				isElementPresent(location, "node_id");
 
 				String attractiveness = location.getElementsByTagName("attractiveness").item(0).getTextContent();
 				int placeTypeIndex = Integer.parseInt(attractiveness);
@@ -732,6 +721,34 @@ public class SimSettings {
 		} catch (Exception e) {
 			SimLogger.printLine("Edge Devices XML cannot be parsed! Terminating simulation...");
 			e.printStackTrace();
+			System.exit(1);
+		}
+	}
+
+
+	private void parseRoadNodesXML(String filePath)
+	{
+		try {
+			File devicesFile = new File(filePath);
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			roadNodesDoc = dBuilder.parse(devicesFile);
+			roadNodesDoc.getDocumentElement().normalize();
+
+			NodeList roadNodesList = roadNodesDoc.getElementsByTagName("node");
+
+			for (int i = 0; i < roadNodesList.getLength(); i++) {
+				Element roadNode = (Element) roadNodesList.item(i);
+				isAttributePresent(roadNode, "id");
+				isAttributePresent(roadNode, "name");
+				isElementPresent(roadNode, "position");
+				Element location = (Element)roadNode.getElementsByTagName("position").item(0);
+				isElementPresent(location, "x");
+				isElementPresent(location, "y");
+			}
+
+		} catch (Exception e) {
+			SimLogger.printLine("Road Nodes XML cannot be parsed! Terminating simulation..." + e);
 			System.exit(1);
 		}
 	}

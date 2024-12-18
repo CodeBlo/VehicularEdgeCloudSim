@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<road_nodes>
+    <node id="0" name="Node0">
+        <position>
+            <x>0</x>
+            <y>0</y>
+        </position>
+        <neighbors>
+            <id>1</id>
+        </neighbors>
+    </node>
+    <node id="1" name="Node1">
+        <position>
+            <x>60</x>
+            <y>0</y>
+        </position>
+        <neighbors>
+            <id>2</id>
+            <id>3</id>
+        </neighbors>
+    </node>
+    <node id="2" name="Node2">
+        <position>
+            <x>60</x>
+            <y>60</y>
+        </position>
+        <neighbors>
+            <id>4</id>
+        </neighbors>
+    </node>
+    <node id="3" name="Node3">
+        <position>
+            <x>60</x>
+            <y>-60</y>
+        </position>
+        <neighbors>
+            <id>5</id>
+        </neighbors>
+    </node>
+    <node id="4" name="Node4">
+        <position>
+            <x>60</x>
+            <y>120</y>
+        </position>
+    </node>
+    <node id="5" name="Node5">
+        <id>5</id>
+        <name>Node5</name>
+        <position>
+            <x>60</x>
+            <y>-120</y>
+        </position>
+    </node>
+</road_nodes>
