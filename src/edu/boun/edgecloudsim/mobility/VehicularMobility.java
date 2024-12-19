@@ -5,12 +5,9 @@ import edu.boun.edgecloudsim.utils.Location;
 import edu.boun.edgecloudsim.utils.SimUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class VehicularMobility extends MobilityModel {
 
@@ -34,21 +31,32 @@ public class VehicularMobility extends MobilityModel {
             carMap.put(i, car);
         }
 
-        for (Car value : carMap.values()) {
+        for (Car car : carMap.values()) {
             double time = SimSettings.CLIENT_ACTIVITY_START_TIME;
-            RoadNode from = value.getFrom(time).getValue();
+            RoadNode from = car.getFrom(time).getValue();
             while (time < simulationTime) {
                 List<RoadNode> neighbours = from.getNeighbours();
                 if (neighbours.isEmpty()) {
                     break;
                 }
+                NavigableMap<Integer, Integer> neighbourVisitCumulativeMap = new TreeMap<>();
+                int totalVisitCount = 0;
+                for (int i = 0; i < neighbours.size(); i++) {
+                    RoadNode neighbour = neighbours.get(i);
+                    int visitCount = car.getVisitCount(from.getId(), neighbour.getId());
+                    totalVisitCount += visitCount == 0 ? 1 : visitCount;
+                    neighbourVisitCumulativeMap.put(totalVisitCount, i);
+                }
 
-                int randomNeighbour = SimUtils.getRandomNumber(0, neighbours.size() - 1);
-                RoadNode neighbour = neighbours.get(randomNeighbour);
+                int randomNumber = SimUtils.getRandomNumber(1, totalVisitCount);
+                int randomNeighbourIndex = neighbourVisitCumulativeMap.ceilingEntry(randomNumber).getValue();
+
+
+                RoadNode neighbour = neighbours.get(randomNeighbourIndex);
                 double distance = Math.sqrt(Math.pow(neighbour.getX() - from.getX(), 2) + Math.pow(neighbour.getY() - from.getY(), 2));
                 double timeToReach = distance / CAR_SPEED;
                 time += timeToReach;
-                value.addDestination(time, neighbour);
+                car.addDestination(time, neighbour);
                 from = neighbour;
             }
         }
