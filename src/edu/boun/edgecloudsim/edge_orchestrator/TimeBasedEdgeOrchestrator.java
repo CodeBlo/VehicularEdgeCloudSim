@@ -31,8 +31,8 @@ import java.util.*;
 import java.util.concurrent.atomic.DoubleAccumulator;
 
 public class TimeBasedEdgeOrchestrator extends EdgeOrchestrator {
-	private static final long TASK_COUNT_THRESHOLD = 10;
-	private static final Double TASK_COUNT_WINDOW = 5.0; //seconds
+	private static final long TASK_COUNT_THRESHOLD = 20;
+	private static final Double TASK_COUNT_WINDOW = 10.0; //seconds
 	private int numberOfHost; //used by load balancer
 	private int lastSelectedHostIndex; //used by load balancer
 	private int[] lastSelectedVmIndexes; //used by each host individually
@@ -79,9 +79,13 @@ public class TimeBasedEdgeOrchestrator extends EdgeOrchestrator {
 			averageRevisitTimeMap.put(roadNode, averageAccumulator);
 			return SimSettings.GENERIC_EDGE_DEVICE_ID;
 		}
-		double averageRevisitTime = averageRevisitTimeMap.get(roadNode).getAverage();
 		averageRevisitTimeMap.get(roadNode).add(timePassed);
-		double timeWindowToCheck = creationTime - averageRevisitTime * 2;
+		double averageRevisitTime = averageRevisitTimeMap.get(roadNode).getAverage();
+		double previousRevisitTime = 0;
+		do {
+			previousRevisitTime += averageRevisitTime;
+		}while (previousRevisitTime < TASK_COUNT_WINDOW);
+		double timeWindowToCheck = creationTime - previousRevisitTime;
 		if (timeWindowToCheck < SimSettings.CLIENT_ACTIVITY_START_TIME) {
 			return SimSettings.GENERIC_EDGE_DEVICE_ID;
 		}
@@ -90,7 +94,7 @@ public class TimeBasedEdgeOrchestrator extends EdgeOrchestrator {
 
 		if (taskCount > TASK_COUNT_THRESHOLD) {
 			int randomNumber = SimUtils.getRandomNumber(1, 100);
-			randomNumber -= taskCount / 10;
+			randomNumber -= - taskCount / 10;
 			if (randomNumber <= 50) {
 				return SimSettings.CLOUD_DATACENTER_ID;
 			}

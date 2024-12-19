@@ -96,7 +96,7 @@ public class VehicularMobility extends MobilityModel {
         int y = (int) (from.getY() + distanceTraveled * normalizedYVector);
 
         double roadHalfTime = enterTime + (exitTime - enterTime) / 2;
-        boolean passedHalf = time > roadHalfTime;
+        boolean passedHalf = time > roadHalfTime - SimSettings.getInstance().getWanPropagationDelay();
         return new Location(1, passedHalf ? destination : from, x, y);
     }
 

@@ -61,8 +61,7 @@ public class VisitCountBasedRandomEdgeOrchestrator extends EdgeOrchestrator {
         RoadNode connectedRoadNode = submittedLocation.getConnectedRoadNode();
         //decide to use cloud or Edge VM
 		int totalVisitCount = roadVisitCountMap.compute(connectedRoadNode, (k, v) -> v == null ? 1 : v + 1);
-		int CloudVmPicker = SimUtils.getRandomNumber(0, 100);
-		CloudVmPicker -= totalVisitCount / 250; //decrease the probability of selecting edge as the visit count increases
+		int CloudVmPicker = SimUtils.getRandomNumber(0, 100 - totalVisitCount / 10);
 		if(CloudVmPicker <= SimSettings.getInstance().getTaskLookUpTable()[task.getTaskType()][1]) {
 			return SimSettings.CLOUD_DATACENTER_ID;
 		}
