@@ -81,7 +81,7 @@ public class VehicularMobility extends MobilityModel {
 
         Map.Entry<Double, RoadNode> destinationEntry = car.getDestination(time);
         if (destinationEntry == null) {
-            return new Location(1, from.getServingWlanId(), from.getX(), from.getY());
+            return new Location(1, from, from.getX(), from.getY());
         }
         double exitTime = destinationEntry.getKey();
         RoadNode destination = destinationEntry.getValue();
@@ -97,7 +97,7 @@ public class VehicularMobility extends MobilityModel {
 
         double roadHalfTime = enterTime + (exitTime - enterTime) / 2;
         boolean passedHalf = time > roadHalfTime;
-        return new Location(1, passedHalf ? destination.getServingWlanId() : from.getServingWlanId(), x, y);
+        return new Location(1, passedHalf ? destination : from, x, y);
     }
 
 

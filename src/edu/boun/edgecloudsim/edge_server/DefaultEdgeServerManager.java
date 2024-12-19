@@ -212,7 +212,7 @@ public class DefaultEdgeServerManager extends EdgeServerManager{
 					new VmSchedulerSpaceShared(peList)
 				);
 			
-			host.setPlace(new Location(placeTypeIndex, wlan_id, roadNodeById.getX(), roadNodeById.getY()));
+			host.setPlace(new Location(placeTypeIndex, new RoadNode(0, "", 0,0, wlan_id), roadNodeById.getX(), roadNodeById.getY()));
 			hostList.add(host);
 			hostIdCounter++;
 		}

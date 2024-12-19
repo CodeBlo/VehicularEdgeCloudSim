@@ -12,31 +12,28 @@
 
 package edu.boun.edgecloudsim.edge_orchestrator;
 
-import java.util.List;
-import java.util.Map;
-
+import edu.boun.edgecloudsim.cloud_server.CloudVM;
+import edu.boun.edgecloudsim.core.SimManager;
+import edu.boun.edgecloudsim.core.SimSettings;
+import edu.boun.edgecloudsim.edge_client.CpuUtilizationModel_Custom;
+import edu.boun.edgecloudsim.edge_client.Task;
+import edu.boun.edgecloudsim.edge_server.EdgeVM;
 import edu.boun.edgecloudsim.mobility.RoadNode;
-import edu.boun.edgecloudsim.mobility.VehicularMobility;
+import edu.boun.edgecloudsim.utils.Location;
+import edu.boun.edgecloudsim.utils.SimUtils;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
 
-import edu.boun.edgecloudsim.cloud_server.CloudVM;
-import edu.boun.edgecloudsim.core.SimManager;
-import edu.boun.edgecloudsim.core.SimSettings;
-import edu.boun.edgecloudsim.edge_server.EdgeVM;
-import edu.boun.edgecloudsim.edge_client.CpuUtilizationModel_Custom;
-import edu.boun.edgecloudsim.edge_client.Task;
-import edu.boun.edgecloudsim.utils.Location;
-import edu.boun.edgecloudsim.utils.SimUtils;
+import java.util.List;
 
-public class BasicEdgeOrchestrator extends EdgeOrchestrator {
+public class RandomEdgeOrchestrator extends EdgeOrchestrator {
 	private int numberOfHost; //used by load balancer
 	private int lastSelectedHostIndex; //used by load balancer
 	private int[] lastSelectedVmIndexes; //used by each host individually
-	
-	public BasicEdgeOrchestrator(String _policy, String _simScenario) {
+
+	public RandomEdgeOrchestrator(String _policy, String _simScenario) {
 		super(_policy, _simScenario);
 	}
 
@@ -52,18 +49,16 @@ public class BasicEdgeOrchestrator extends EdgeOrchestrator {
 
 	@Override
 	public int getDeviceToOffload(Task task) {
-		int result = SimSettings.GENERIC_EDGE_DEVICE_ID;
-		if(!simScenario.equals("SINGLE_TIER")){
-			//decide to use cloud or Edge VM
-			int CloudVmPicker = SimUtils.getRandomNumber(0, 100);
-			
-			if(CloudVmPicker <= SimSettings.getInstance().getTaskLookUpTable()[task.getTaskType()][1])
-				result = SimSettings.CLOUD_DATACENTER_ID;
-			else
-				result = SimSettings.GENERIC_EDGE_DEVICE_ID;
-		}
-		
-		return result;
+        if (simScenario.equals("SINGLE_TIER")) {
+            return SimSettings.GENERIC_EDGE_DEVICE_ID;
+        }
+
+		int CloudVmPicker = SimUtils.getRandomNumber(0, 100);
+        if(CloudVmPicker <= SimSettings.getInstance().getTaskLookUpTable()[task.getTaskType()][1]) {
+            return SimSettings.CLOUD_DATACENTER_ID;
+        }
+
+        return SimSettings.GENERIC_EDGE_DEVICE_ID;
 	}
 	
 	@Override

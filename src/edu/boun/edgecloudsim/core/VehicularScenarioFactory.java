@@ -8,17 +8,15 @@
  * Copyright (c) 2017, Bogazici University, Istanbul, Turkey
  */
 
-package edu.boun.edgecloudsim;
+package edu.boun.edgecloudsim.core;
 
 import edu.boun.edgecloudsim.cloud_server.CloudServerManager;
 import edu.boun.edgecloudsim.cloud_server.DefaultCloudServerManager;
-import edu.boun.edgecloudsim.core.ScenarioFactory;
 import edu.boun.edgecloudsim.edge_client.DefaultMobileDeviceManager;
 import edu.boun.edgecloudsim.edge_client.MobileDeviceManager;
 import edu.boun.edgecloudsim.edge_client.mobile_processing_unit.DefaultMobileServerManager;
 import edu.boun.edgecloudsim.edge_client.mobile_processing_unit.MobileServerManager;
-import edu.boun.edgecloudsim.edge_orchestrator.BasicEdgeOrchestrator;
-import edu.boun.edgecloudsim.edge_orchestrator.EdgeOrchestrator;
+import edu.boun.edgecloudsim.edge_orchestrator.*;
 import edu.boun.edgecloudsim.edge_server.DefaultEdgeServerManager;
 import edu.boun.edgecloudsim.edge_server.EdgeServerManager;
 import edu.boun.edgecloudsim.mobility.MobilityModel;
@@ -33,16 +31,18 @@ public class VehicularScenarioFactory implements ScenarioFactory {
 	private double simulationTime;
 	private String orchestratorPolicy;
 	private String simScenario;
+	private final PredictionType predictionType;
 
-	VehicularScenarioFactory(int _numOfMobileDevice,
-                             double _simulationTime,
-                             String _orchestratorPolicy,
-                             String _simScenario){
+	public VehicularScenarioFactory(int _numOfMobileDevice,
+                                    double _simulationTime,
+                                    String _orchestratorPolicy,
+                                    String _simScenario, PredictionType predictionType){
 		orchestratorPolicy = _orchestratorPolicy;
 		numOfMobileDevice = _numOfMobileDevice;
 		simulationTime = _simulationTime;
 		simScenario = _simScenario;
-	}
+        this.predictionType = predictionType;
+    }
 	
 	@Override
 	public LoadGeneratorModel getLoadGeneratorModel() {
@@ -51,7 +51,11 @@ public class VehicularScenarioFactory implements ScenarioFactory {
 
 	@Override
 	public EdgeOrchestrator getEdgeOrchestrator() {
-		return new BasicEdgeOrchestrator(orchestratorPolicy, simScenario);
+		return switch (predictionType) {
+			case RANDOM -> new RandomEdgeOrchestrator(orchestratorPolicy, simScenario);
+			case VISIT_COUNT_BASED -> new VisitCountBasedRandomEdgeOrchestrator(orchestratorPolicy, simScenario);
+			case TIME_BASED -> new TimeBasedEdgeOrchestrator(orchestratorPolicy, simScenario);
+		};
 	}
 
 	@Override

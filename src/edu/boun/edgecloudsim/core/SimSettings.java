@@ -18,7 +18,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -94,6 +93,7 @@ public class SimSettings {
 
 	private String[] SIMULATION_SCENARIOS;
 	private String[] ORCHESTRATOR_POLICIES;
+	private PredictionType[] PREDICTION_TYPES;
 
 	private double NORTHERN_BOUND;
 	private double EASTERN_BOUND;
@@ -180,6 +180,11 @@ public class SimSettings {
 			ORCHESTRATOR_POLICIES = prop.getProperty("orchestrator_policies").split(",");
 
 			SIMULATION_SCENARIOS = prop.getProperty("simulation_scenarios").split(",");
+			String[] predictionTypes = prop.getProperty("prediction_types").split(",");
+			PREDICTION_TYPES = new PredictionType[predictionTypes.length];
+			for (int i = 0; i < predictionTypes.length; i++) {
+				PREDICTION_TYPES[i] = PredictionType.valueOf(predictionTypes[i]);
+			}
 
 			NORTHERN_BOUND = Double.parseDouble(prop.getProperty("northern_bound", "0"));
 			SOUTHERN_BOUND = Double.parseDouble(prop.getProperty("southern_bound", "0"));
@@ -499,6 +504,11 @@ public class SimSettings {
 		return ORCHESTRATOR_POLICIES;
 	}
 
+
+	public PredictionType[] getPredictionTypes()
+	{
+		return PREDICTION_TYPES;
+	}
 
 	public double getNorthernBound() {
 		return NORTHERN_BOUND;

@@ -2,6 +2,7 @@ package edu.boun.edgecloudsim.mobility;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RoadNode {
     private final int id;
@@ -48,5 +49,20 @@ public class RoadNode {
 
     public int getServingWlanId() {
         return servingWlanId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RoadNode roadNode = (RoadNode) o;
+
+        return id == roadNode.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
     }
 }

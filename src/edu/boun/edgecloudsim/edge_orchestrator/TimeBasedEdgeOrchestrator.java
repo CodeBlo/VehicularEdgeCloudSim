@@ -12,38 +12,47 @@
 
 package edu.boun.edgecloudsim.edge_orchestrator;
 
-import java.util.List;
-import java.util.Map;
-
+import edu.boun.edgecloudsim.cloud_server.CloudVM;
+import edu.boun.edgecloudsim.core.SimManager;
+import edu.boun.edgecloudsim.core.SimSettings;
+import edu.boun.edgecloudsim.edge_client.CpuUtilizationModel_Custom;
+import edu.boun.edgecloudsim.edge_client.Task;
+import edu.boun.edgecloudsim.edge_server.EdgeVM;
 import edu.boun.edgecloudsim.mobility.RoadNode;
-import edu.boun.edgecloudsim.mobility.VehicularMobility;
+import edu.boun.edgecloudsim.utils.AverageAccumulator;
+import edu.boun.edgecloudsim.utils.Location;
+import edu.boun.edgecloudsim.utils.SimUtils;
 import org.cloudbus.cloudsim.Host;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
 
-import edu.boun.edgecloudsim.cloud_server.CloudVM;
-import edu.boun.edgecloudsim.core.SimManager;
-import edu.boun.edgecloudsim.core.SimSettings;
-import edu.boun.edgecloudsim.edge_server.EdgeVM;
-import edu.boun.edgecloudsim.edge_client.CpuUtilizationModel_Custom;
-import edu.boun.edgecloudsim.edge_client.Task;
-import edu.boun.edgecloudsim.utils.Location;
-import edu.boun.edgecloudsim.utils.SimUtils;
+import java.util.*;
+import java.util.concurrent.atomic.DoubleAccumulator;
 
-public class BasicEdgeOrchestrator extends EdgeOrchestrator {
+public class TimeBasedEdgeOrchestrator extends EdgeOrchestrator {
+	private static final long TASK_COUNT_THRESHOLD = 10;
+	private static final Double TASK_COUNT_WINDOW = 5.0; //seconds
 	private int numberOfHost; //used by load balancer
 	private int lastSelectedHostIndex; //used by load balancer
 	private int[] lastSelectedVmIndexes; //used by each host individually
-	
-	public BasicEdgeOrchestrator(String _policy, String _simScenario) {
+	private final Map<RoadNode, AverageAccumulator> averageRevisitTimeMap = new HashMap<>();
+	private final Map<RoadNode, Double> lastVisitTimeMap = new HashMap<>();
+	private final NavigableMap<Double, Map<RoadNode, Integer>> taskProcessCountMap = new TreeMap<>();
+
+	public TimeBasedEdgeOrchestrator(String _policy, String _simScenario) {
 		super(_policy, _simScenario);
 	}
 
 	@Override
 	public void initialize() {
 		numberOfHost=SimSettings.getInstance().getNumOfEdgeHosts();
-		
+
+		double simulationTime = SimSettings.getInstance().getSimulationTime();
+		int taskCountWindowCount = (int) Math.ceil(simulationTime / TASK_COUNT_WINDOW);
+		for (int i = 1; i < taskCountWindowCount+1; i++) {
+			taskProcessCountMap.put(i * TASK_COUNT_WINDOW + SimSettings.CLIENT_ACTIVITY_START_TIME, new HashMap<>());
+		}
 		lastSelectedHostIndex = -1;
 		lastSelectedVmIndexes = new int[numberOfHost];
 		for(int i=0; i<numberOfHost; i++)
@@ -52,18 +61,42 @@ public class BasicEdgeOrchestrator extends EdgeOrchestrator {
 
 	@Override
 	public int getDeviceToOffload(Task task) {
-		int result = SimSettings.GENERIC_EDGE_DEVICE_ID;
-		if(!simScenario.equals("SINGLE_TIER")){
-			//decide to use cloud or Edge VM
-			int CloudVmPicker = SimUtils.getRandomNumber(0, 100);
-			
-			if(CloudVmPicker <= SimSettings.getInstance().getTaskLookUpTable()[task.getTaskType()][1])
-				result = SimSettings.CLOUD_DATACENTER_ID;
-			else
-				result = SimSettings.GENERIC_EDGE_DEVICE_ID;
+
+        if (simScenario.equals("SINGLE_TIER")) {
+            return SimSettings.GENERIC_EDGE_DEVICE_ID;
+        }
+		double creationTime = task.getCreationTime();
+
+		Location submittedLocation = task.getSubmittedLocation();
+		RoadNode roadNode = submittedLocation.getConnectedRoadNode();
+		taskProcessCountMap.ceilingEntry(creationTime).getValue().compute(roadNode, (k, v) -> v == null ? 1 : v + 1);
+
+		double lastVisitTime = Objects.requireNonNullElse(lastVisitTimeMap.put(roadNode, creationTime), SimSettings.CLIENT_ACTIVITY_START_TIME);
+		double timePassed = creationTime - lastVisitTime ;
+		if (!averageRevisitTimeMap.containsKey(roadNode)) {
+			AverageAccumulator averageAccumulator = new AverageAccumulator();
+			averageAccumulator.add(timePassed);
+			averageRevisitTimeMap.put(roadNode, averageAccumulator);
+			return SimSettings.GENERIC_EDGE_DEVICE_ID;
 		}
-		
-		return result;
+		double averageRevisitTime = averageRevisitTimeMap.get(roadNode).getAverage();
+		averageRevisitTimeMap.get(roadNode).add(timePassed);
+		double timeWindowToCheck = creationTime - averageRevisitTime * 2;
+		if (timeWindowToCheck < SimSettings.CLIENT_ACTIVITY_START_TIME) {
+			return SimSettings.GENERIC_EDGE_DEVICE_ID;
+		}
+		int taskCount = taskProcessCountMap.ceilingEntry(timeWindowToCheck).getValue().getOrDefault(roadNode, 0);
+
+
+		if (taskCount > TASK_COUNT_THRESHOLD) {
+			int randomNumber = SimUtils.getRandomNumber(1, 100);
+			randomNumber -= taskCount / 10;
+			if (randomNumber <= 50) {
+				return SimSettings.CLOUD_DATACENTER_ID;
+			}
+		}
+
+		return SimSettings.GENERIC_EDGE_DEVICE_ID;
 	}
 	
 	@Override

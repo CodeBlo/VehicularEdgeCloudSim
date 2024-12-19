@@ -9,13 +9,15 @@
 
 package edu.boun.edgecloudsim.utils;
 
+import edu.boun.edgecloudsim.mobility.RoadNode;
+
 public class Location {
 	private int xPos;
 	private int yPos;
-	private int servingWlanId;
 	private int placeTypeIndex;
-	public Location(int _placeTypeIndex, int _servingWlanId, int _xPos, int _yPos){
-		servingWlanId = _servingWlanId;
+	private RoadNode connectedRoadNode;
+	public Location(int _placeTypeIndex, RoadNode connectedRoadNode, int _xPos, int _yPos){
+		this.connectedRoadNode = connectedRoadNode;
 		placeTypeIndex=_placeTypeIndex;
 		xPos = _xPos;
 		yPos = _yPos;
@@ -42,7 +44,7 @@ public class Location {
 	}
 
 	public int getServingWlanId(){
-		return servingWlanId;
+		return connectedRoadNode.getServingWlanId();
 	}
 	
 	public int getPlaceTypeIndex(){
@@ -55,5 +57,9 @@ public class Location {
 	
 	public int getYPos(){
 		return yPos;
+	}
+
+	public RoadNode getConnectedRoadNode() {
+		return connectedRoadNode;
 	}
 }
