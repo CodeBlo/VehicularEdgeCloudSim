@@ -42,13 +42,27 @@
             <x>60</x>
             <y>120</y>
         </position>
+        <neighbors>
+            <id>0</id>
+            <id>6</id>
+        </neighbors>
     </node>
     <node id="5" name="Node5">
-        <id>5</id>
-        <name>Node5</name>
         <position>
             <x>60</x>
             <y>-120</y>
         </position>
+        <neighbors>
+            <id>0</id>
+        </neighbors>
+    </node>
+    <node id="6" name="Node6">
+        <position>
+            <x>30</x>
+            <y>120</y>
+        </position>
+        <neighbors>
+            <id>0</id>
+        </neighbors>
     </node>
 </road_nodes>
