@@ -1,25 +1,30 @@
 /*
- * Title:        EdgeCloudSim - M/M/1 Queue model implementation
+ * Title:        EdgeCloudSim - Network Model
  * 
  * Description: 
- * MM1Queue implements M/M/1 Queue model for WLAN and WAN communication
- * 
+ * SampleNetworkModel uses
+ * -> the result of an empirical study for the WLAN and WAN delays
+ * The experimental network model is developed
+ * by taking measurements from the real life deployments.
+ *   
+ * -> MMPP/MMPP/1 queue model for MAN delay
+ * MAN delay is observed via a single server queue model with
+ * Markov-modulated Poisson process (MMPP) arrivals.
+ *   
  * Licence:      GPL - http://www.gnu.org/copyleft/gpl.html
  * Copyright (c) 2017, Bogazici University, Istanbul, Turkey
  */
 
-package edu.boun.edgecloudsim.applications.sample_app4;
-
-import org.cloudbus.cloudsim.core.CloudSim;
+package edu.boun.edgecloudsim.network;
 
 import edu.boun.edgecloudsim.core.SimManager;
 import edu.boun.edgecloudsim.core.SimSettings;
 import edu.boun.edgecloudsim.edge_client.Task;
-import edu.boun.edgecloudsim.network.NetworkModel;
 import edu.boun.edgecloudsim.utils.Location;
 import edu.boun.edgecloudsim.utils.SimLogger;
+import org.cloudbus.cloudsim.core.CloudSim;
 
-public class FuzzyExperimentalNetworkModel extends NetworkModel {
+public class SampleNetworkModel extends NetworkModel {
 	public static enum NETWORK_TYPE {WLAN, LAN};
 	public static enum LINK_TYPE {DOWNLOAD, UPLOAD};
 	public static double MAN_BW = 1300*1024; //Kbps
@@ -29,7 +34,7 @@ public class FuzzyExperimentalNetworkModel extends NetworkModel {
 	private int[] wanClients;
 	private int[] wlanClients;
 	
-	private double lastMM1QueeuUpdateTime;
+	private double lastMM1QueueUpdateTime;
 	private double ManPoissonMeanForDownload; //seconds
 	private double ManPoissonMeanForUpload; //seconds
 
@@ -174,7 +179,7 @@ public class FuzzyExperimentalNetworkModel extends NetworkModel {
 		/*25 Clients*/ 1311.131 /*(Kbps)*/
 	};
 	
-	public FuzzyExperimentalNetworkModel(int _numberOfMobileDevices, String _simScenario) {
+	public SampleNetworkModel(int _numberOfMobileDevices, String _simScenario) {
 		super(_numberOfMobileDevices, _simScenario);
 	}
 
@@ -207,7 +212,7 @@ public class FuzzyExperimentalNetworkModel extends NetworkModel {
 		avgManTaskInputSize = avgManTaskInputSize/numOfApp;
 		avgManTaskOutputSize = avgManTaskOutputSize/numOfApp;
 		
-		lastMM1QueeuUpdateTime = SimSettings.CLIENT_ACTIVITY_START_TIME;
+		lastMM1QueueUpdateTime = SimSettings.CLIENT_ACTIVITY_START_TIME;
 		totalManTaskOutputSize = 0;
 		numOfManTaskForDownload = 0;
 		totalManTaskInputSize = 0;
@@ -275,7 +280,7 @@ public class FuzzyExperimentalNetworkModel extends NetworkModel {
 		else if (destDeviceId == SimSettings.GENERIC_EDGE_DEVICE_ID+1)
 			manClients++;
 		else {
-			SimLogger.printLine("Error - unknown device id in FuzzyExperimentalNetworkModel.uploadStarted(. Terminating simulation...");
+			SimLogger.printLine("Error - unknown device id in uploadStarted(). Terminating simulation...");
 			System.exit(0);
 		}
 	}
@@ -289,7 +294,7 @@ public class FuzzyExperimentalNetworkModel extends NetworkModel {
 		else if (destDeviceId == SimSettings.GENERIC_EDGE_DEVICE_ID+1)
 			manClients--;
 		else {
-			SimLogger.printLine("Error - unknown device id in FuzzyExperimentalNetworkModel.uploadFinished(. Terminating simulation...");
+			SimLogger.printLine("Error - unknown device id in uploadFinished(). Terminating simulation...");
 			System.exit(0);
 		}
 	}
@@ -303,7 +308,7 @@ public class FuzzyExperimentalNetworkModel extends NetworkModel {
 		else if(sourceDeviceId == SimSettings.GENERIC_EDGE_DEVICE_ID+1)
 			manClients++;
 		else {
-			SimLogger.printLine("Error - unknown device id in FuzzyExperimentalNetworkModel.downloadStarted(. Terminating simulation...");
+			SimLogger.printLine("Error - unknown device id in downloadStarted(). Terminating simulation...");
 			System.exit(0);
 		}
 	}
@@ -317,7 +322,7 @@ public class FuzzyExperimentalNetworkModel extends NetworkModel {
 		else if(sourceDeviceId == SimSettings.GENERIC_EDGE_DEVICE_ID+1)
 			manClients--;
 		else {
-			SimLogger.printLine("Error - unknown device id in FuzzyExperimentalNetworkModel.downloadFinished(. Terminating simulation...");
+			SimLogger.printLine("Error - unknown device id in downloadFinished(). Terminating simulation...");
 			System.exit(0);
 		}
 	}
@@ -405,8 +410,8 @@ public class FuzzyExperimentalNetworkModel extends NetworkModel {
 	}
 	
 	public void updateMM1QueeuModel(){
-		double lastInterval = CloudSim.clock() - lastMM1QueeuUpdateTime;
-		lastMM1QueeuUpdateTime = CloudSim.clock();
+		double lastInterval = CloudSim.clock() - lastMM1QueueUpdateTime;
+		lastMM1QueueUpdateTime = CloudSim.clock();
 		
 		if(numOfManTaskForDownload != 0){
 			ManPoissonMeanForDownload = lastInterval / (numOfManTaskForDownload / (double)numberOfMobileDevices);

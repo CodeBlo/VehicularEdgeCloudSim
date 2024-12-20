@@ -14,6 +14,7 @@ import edu.boun.edgecloudsim.cloud_server.CloudServerManager;
 import edu.boun.edgecloudsim.cloud_server.DefaultCloudServerManager;
 import edu.boun.edgecloudsim.edge_client.DefaultMobileDeviceManager;
 import edu.boun.edgecloudsim.edge_client.MobileDeviceManager;
+import edu.boun.edgecloudsim.edge_client.SampleMobileDeviceManager;
 import edu.boun.edgecloudsim.edge_client.mobile_processing_unit.DefaultMobileServerManager;
 import edu.boun.edgecloudsim.edge_client.mobile_processing_unit.MobileServerManager;
 import edu.boun.edgecloudsim.edge_orchestrator.*;
@@ -23,6 +24,7 @@ import edu.boun.edgecloudsim.mobility.MobilityModel;
 import edu.boun.edgecloudsim.mobility.VehicularMobility;
 import edu.boun.edgecloudsim.network.MM1Queue;
 import edu.boun.edgecloudsim.network.NetworkModel;
+import edu.boun.edgecloudsim.network.SampleNetworkModel;
 import edu.boun.edgecloudsim.task_generator.IdleActiveLoadGenerator;
 import edu.boun.edgecloudsim.task_generator.LoadGeneratorModel;
 
@@ -65,7 +67,7 @@ public class VehicularScenarioFactory implements ScenarioFactory {
 
 	@Override
 	public NetworkModel getNetworkModel() {
-		return new MM1Queue(numOfMobileDevice, simScenario);
+		return new SampleNetworkModel(numOfMobileDevice, simScenario);
 	}
 
 	@Override
@@ -80,7 +82,7 @@ public class VehicularScenarioFactory implements ScenarioFactory {
 	
 	@Override
 	public MobileDeviceManager getMobileDeviceManager() throws Exception {
-		return new DefaultMobileDeviceManager();
+		return new SampleMobileDeviceManager();
 	}
 
 	@Override

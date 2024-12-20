@@ -2,19 +2,41 @@
  * Title:        EdgeCloudSim - Mobile Device Manager
  * 
  * Description: 
- * DefaultMobileDeviceManager is responsible for submitting the tasks to the related
- * device by using the Edge Orchestrator. It also takes proper actions 
- * when the execution of the tasks are finished.
- * By default, DefaultMobileDeviceManager sends tasks to the edge servers or
- * cloud servers. If you want to use different topology, for example
- * MAN edge server, you should modify the flow defined in this class.
+ * Mobile Device Manager is one of the most important component
+ * in EdgeCloudSim. It is responsible for creating the tasks,
+ * submitting them to the related VM with respect to the
+ * Edge Orchestrator decision, and takes proper actions when
+ * the execution of the tasks are finished. It also feeds the
+ * SimLogger with the relevant results.
+
+ * SampleMobileDeviceManager sends tasks to the edge servers or
+ * cloud servers. The mobile devices use WAN if the tasks are
+ * offloaded to the edge servers. On the other hand, they use WLAN
+ * if the target server is an edge server. Finally, the mobile
+ * devices use MAN if they must be served by a remote edge server
+ * due to the congestion at their own location. In this case,
+ * they access the edge server via two hops where the packets
+ * must go through WLAN and MAN.
+ * 
+ * If you want to use different topology, you should modify
+ * the flow implemented in this class.
  * 
  * Licence:      GPL - http://www.gnu.org/copyleft/gpl.html
  * Copyright (c) 2017, Bogazici University, Istanbul, Turkey
  */
 
-package edu.boun.edgecloudsim.applications.sample_app4;
+package edu.boun.edgecloudsim.edge_client;
 
+import edu.boun.edgecloudsim.core.SimManager;
+import edu.boun.edgecloudsim.core.SimSettings;
+import edu.boun.edgecloudsim.core.SimSettings.NETWORK_DELAY_TYPES;
+import edu.boun.edgecloudsim.edge_server.EdgeHost;
+import edu.boun.edgecloudsim.edge_server.EdgeVM;
+import edu.boun.edgecloudsim.network.NetworkModel;
+import edu.boun.edgecloudsim.network.SampleNetworkModel;
+import edu.boun.edgecloudsim.utils.Location;
+import edu.boun.edgecloudsim.utils.SimLogger;
+import edu.boun.edgecloudsim.utils.TaskProperty;
 import org.cloudbus.cloudsim.UtilizationModel;
 import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
@@ -22,20 +44,7 @@ import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.CloudSimTags;
 import org.cloudbus.cloudsim.core.SimEvent;
 
-import edu.boun.edgecloudsim.core.SimManager;
-import edu.boun.edgecloudsim.core.SimSettings;
-import edu.boun.edgecloudsim.core.SimSettings.NETWORK_DELAY_TYPES;
-import edu.boun.edgecloudsim.edge_client.CpuUtilizationModel_Custom;
-import edu.boun.edgecloudsim.edge_client.MobileDeviceManager;
-import edu.boun.edgecloudsim.edge_client.Task;
-import edu.boun.edgecloudsim.edge_server.EdgeHost;
-import edu.boun.edgecloudsim.edge_server.EdgeVM;
-import edu.boun.edgecloudsim.network.NetworkModel;
-import edu.boun.edgecloudsim.utils.TaskProperty;
-import edu.boun.edgecloudsim.utils.Location;
-import edu.boun.edgecloudsim.utils.SimLogger;
-
-public class FuzzyMobileDeviceManager extends MobileDeviceManager {
+public class SampleMobileDeviceManager extends MobileDeviceManager {
 	private static final int BASE = 100000; //start from base in order not to conflict cloudsim tag!
 	
 	private static final int UPDATE_MM1_QUEUE_MODEL = BASE + 1;
@@ -50,7 +59,7 @@ public class FuzzyMobileDeviceManager extends MobileDeviceManager {
 	
 	private int taskIdCounter=0;
 	
-	public FuzzyMobileDeviceManager() throws Exception{
+	public SampleMobileDeviceManager() throws Exception{
 	}
 
 	@Override
@@ -169,7 +178,7 @@ public class FuzzyMobileDeviceManager extends MobileDeviceManager {
 		switch (ev.getTag()) {
 			case UPDATE_MM1_QUEUE_MODEL:
 			{
-				((FuzzyExperimentalNetworkModel)networkModel).updateMM1QueeuModel();
+				((SampleNetworkModel)networkModel).updateMM1QueeuModel();
 				schedule(getId(), MM1_QUEUE_MODEL_UPDATE_INTEVAL, UPDATE_MM1_QUEUE_MODEL);
 	
 				break;
@@ -254,7 +263,7 @@ public class FuzzyMobileDeviceManager extends MobileDeviceManager {
 				
 				if(task.getAssociatedDatacenterId() == SimSettings.CLOUD_DATACENTER_ID)
 					networkModel.downloadFinished(task.getSubmittedLocation(), SimSettings.CLOUD_DATACENTER_ID);
-				else if(task.getAssociatedDatacenterId() != SimSettings.MOBILE_DATACENTER_ID)
+				else
 					networkModel.downloadFinished(task.getSubmittedLocation(), SimSettings.GENERIC_EDGE_DEVICE_ID);
 				
 				SimLogger.getInstance().taskEnded(task.getCloudletId(), CloudSim.clock());
