@@ -11,7 +11,7 @@
     </node>
     <node id="1" name="Node1">
         <position>
-            <x>60</x>
+            <x>120</x>
             <y>0</y>
         </position>
         <neighbors>
@@ -21,8 +21,8 @@
     </node>
     <node id="2" name="Node2">
         <position>
-            <x>60</x>
-            <y>60</y>
+            <x>120</x>
+            <y>120</y>
         </position>
         <neighbors>
             <id>4</id>
@@ -30,8 +30,8 @@
     </node>
     <node id="3" name="Node3">
         <position>
-            <x>60</x>
-            <y>-60</y>
+            <x>120</x>
+            <y>-120</y>
         </position>
         <neighbors>
             <id>5</id>
@@ -39,8 +39,8 @@
     </node>
     <node id="4" name="Node4">
         <position>
-            <x>60</x>
-            <y>120</y>
+            <x>120</x>
+            <y>240</y>
         </position>
         <neighbors>
             <id>0</id>
@@ -49,8 +49,8 @@
     </node>
     <node id="5" name="Node5">
         <position>
-            <x>60</x>
-            <y>-120</y>
+            <x>120</x>
+            <y>-240</y>
         </position>
         <neighbors>
             <id>0</id>
@@ -58,8 +58,8 @@
     </node>
     <node id="6" name="Node6">
         <position>
-            <x>30</x>
-            <y>120</y>
+            <x>60</x>
+            <y>240</y>
         </position>
         <neighbors>
             <id>0</id>
