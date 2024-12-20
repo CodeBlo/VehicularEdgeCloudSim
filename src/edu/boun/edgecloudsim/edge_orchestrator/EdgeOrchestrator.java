@@ -13,16 +13,17 @@
 
 package edu.boun.edgecloudsim.edge_orchestrator;
 
+import edu.boun.edgecloudsim.core.OrchestratorPolicy;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.SimEntity;
 
 import edu.boun.edgecloudsim.edge_client.Task;
 
 public abstract class EdgeOrchestrator extends SimEntity{
-	protected String policy;
+	protected OrchestratorPolicy policy;
 	protected String simScenario;
 	
-	public EdgeOrchestrator(String _policy, String _simScenario){
+	public EdgeOrchestrator(OrchestratorPolicy _policy, String _simScenario){
 		super("EdgeOrchestrator");
 		policy = _policy;
 		simScenario = _simScenario;

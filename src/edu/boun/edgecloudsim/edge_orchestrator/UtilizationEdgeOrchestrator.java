@@ -1,68 +1,69 @@
 /*
- * Title:        EdgeCloudSim - Basic Edge Orchestrator implementation
+ * Title:        EdgeCloudSim - Edge Orchestrator
  * 
  * Description: 
- * BasicEdgeOrchestrator implements basic algorithms which are
- * first/next/best/worst/random fit algorithms while assigning
- * requests to the edge devices.
- *               
+ * SampleEdgeOrchestrator offloads tasks to proper server
+ * by considering WAN bandwidth and edge server utilization.
+ * After the target server is decided, the least loaded VM is selected.
+ * If the target server is a remote edge server, MAN is used.
+ * 
  * Licence:      GPL - http://www.gnu.org/copyleft/gpl.html
  * Copyright (c) 2017, Bogazici University, Istanbul, Turkey
  */
 
 package edu.boun.edgecloudsim.edge_orchestrator;
 
-import edu.boun.edgecloudsim.cloud_server.CloudVM;
+import java.util.List;
+
 import edu.boun.edgecloudsim.core.OrchestratorPolicy;
-import edu.boun.edgecloudsim.core.SimManager;
-import edu.boun.edgecloudsim.core.SimSettings;
-import edu.boun.edgecloudsim.edge_client.CpuUtilizationModel_Custom;
-import edu.boun.edgecloudsim.edge_client.Task;
-import edu.boun.edgecloudsim.edge_server.EdgeVM;
-import edu.boun.edgecloudsim.mobility.RoadNode;
-import edu.boun.edgecloudsim.utils.Location;
-import edu.boun.edgecloudsim.utils.SimLogger;
-import edu.boun.edgecloudsim.utils.SimUtils;
 import org.cloudbus.cloudsim.Host;
+import org.cloudbus.cloudsim.UtilizationModelFull;
 import org.cloudbus.cloudsim.Vm;
 import org.cloudbus.cloudsim.core.CloudSim;
 import org.cloudbus.cloudsim.core.SimEvent;
 
-import java.util.List;
+import edu.boun.edgecloudsim.cloud_server.CloudVM;
+import edu.boun.edgecloudsim.core.SimManager;
+import edu.boun.edgecloudsim.core.SimSettings;
+import edu.boun.edgecloudsim.edge_orchestrator.EdgeOrchestrator;
+import edu.boun.edgecloudsim.edge_server.EdgeVM;
+import edu.boun.edgecloudsim.edge_client.CpuUtilizationModel_Custom;
+import edu.boun.edgecloudsim.edge_client.Task;
+import edu.boun.edgecloudsim.utils.SimLogger;
 
-public class RandomEdgeOrchestrator extends EdgeOrchestrator {
+public class UtilizationEdgeOrchestrator extends EdgeOrchestrator {
+	
 	private int numberOfHost; //used by load balancer
-	private int lastSelectedHostIndex; //used by load balancer
-	private int[] lastSelectedVmIndexes; //used by each host individually
 
-	public RandomEdgeOrchestrator(OrchestratorPolicy _policy, String _simScenario) {
+	public UtilizationEdgeOrchestrator(OrchestratorPolicy _policy, String _simScenario) {
 		super(_policy, _simScenario);
 	}
 
 	@Override
 	public void initialize() {
 		numberOfHost=SimSettings.getInstance().getNumOfEdgeHosts();
-		
-		lastSelectedHostIndex = -1;
-		lastSelectedVmIndexes = new int[numberOfHost];
-		for(int i=0; i<numberOfHost; i++)
-			lastSelectedVmIndexes[i] = -1;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see edu.boun.edgecloudsim.edge_orchestrator.EdgeOrchestrator#getDeviceToOffload(edu.boun.edgecloudsim.edge_client.Task)
+	 * 
+	 * It is assumed that the edge orchestrator app is running on the edge devices in a distributed manner
+	 */
 	@Override
 	public int getDeviceToOffload(Task task) {
-        if (simScenario.equals("SINGLE_TIER")) {
-            return SimSettings.GENERIC_EDGE_DEVICE_ID;
-        }
+		int result = 0;
+		double edgeUtilization = SimManager.getInstance().getEdgeServerManager().getAvgUtilization();
+		if(edgeUtilization > 80)
+			result = SimSettings.CLOUD_DATACENTER_ID;
+		else
+			result = SimSettings.GENERIC_EDGE_DEVICE_ID;
 
-		int CloudVmPicker = SimUtils.getRandomNumber(0, 100);
-        if(CloudVmPicker <= SimSettings.getInstance().getTaskLookUpTable()[task.getTaskType()][1]) {
-            return SimSettings.CLOUD_DATACENTER_ID;
-        }
 
-        return SimSettings.GENERIC_EDGE_DEVICE_ID;
+
+		return result;
 	}
-	
+
 	@Override
 	public Vm getVmToOffload(Task task, int deviceId) {
 		Vm selectedVM = null;
@@ -102,25 +103,23 @@ public class RandomEdgeOrchestrator extends EdgeOrchestrator {
 			SimLogger.printLine("Unknown device id! The simulation has been terminated.");
 			System.exit(0);
 		}
-		
+
 		return selectedVM;
 	}
 
 	@Override
 	public void processEvent(SimEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do!
 	}
 
 	@Override
 	public void shutdownEntity() {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do!
 	}
 
 	@Override
 	public void startEntity() {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do!
 	}
+
 }

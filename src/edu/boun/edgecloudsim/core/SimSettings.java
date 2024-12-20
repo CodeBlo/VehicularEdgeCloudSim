@@ -92,9 +92,7 @@ public class SimSettings {
 	private int STORAGE_FOR_VM; //Byte
 
 	private String[] SIMULATION_SCENARIOS;
-	private String[] ORCHESTRATOR_POLICIES;
-	private PredictionType[] PREDICTION_TYPES;
-
+	private OrchestratorPolicy[] ORCHESTRATOR_POLICIES;
 	private double NORTHERN_BOUND;
 	private double EASTERN_BOUND;
 	private double SOUTHERN_BOUND;
@@ -177,13 +175,12 @@ public class SimSettings {
 			MIPS_FOR_VM = Integer.parseInt(prop.getProperty("mips_for_mobile_vm"));
 			STORAGE_FOR_VM = Integer.parseInt(prop.getProperty("storage_for_mobile_vm"));
 
-			ORCHESTRATOR_POLICIES = prop.getProperty("orchestrator_policies").split(",");
 
 			SIMULATION_SCENARIOS = prop.getProperty("simulation_scenarios").split(",");
-			String[] predictionTypes = prop.getProperty("prediction_types").split(",");
-			PREDICTION_TYPES = new PredictionType[predictionTypes.length];
-			for (int i = 0; i < predictionTypes.length; i++) {
-				PREDICTION_TYPES[i] = PredictionType.valueOf(predictionTypes[i]);
+			String[] orchestratorsPolicies = prop.getProperty("orchestrator_policies").split(",");
+			ORCHESTRATOR_POLICIES = new OrchestratorPolicy[orchestratorsPolicies.length];
+			for (int i = 0; i < orchestratorsPolicies.length; i++) {
+				ORCHESTRATOR_POLICIES[i] = OrchestratorPolicy.valueOf(orchestratorsPolicies[i]);
 			}
 
 			NORTHERN_BOUND = Double.parseDouble(prop.getProperty("northern_bound", "0"));
@@ -499,16 +496,12 @@ public class SimSettings {
 	/**
 	 * returns orchestrator policies as string
 	 */
-	public String[] getOrchestratorPolicies()
+	public OrchestratorPolicy[] getOrchestratorPolicies()
 	{
 		return ORCHESTRATOR_POLICIES;
 	}
 
 
-	public PredictionType[] getPredictionTypes()
-	{
-		return PREDICTION_TYPES;
-	}
 
 	public double getNorthernBound() {
 		return NORTHERN_BOUND;

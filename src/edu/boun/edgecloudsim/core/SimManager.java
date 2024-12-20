@@ -40,7 +40,7 @@ public class SimManager extends SimEntity {
 	private static final int STOP_SIMULATION = 4;
 	
 	private String simScenario;
-	private String orchestratorPolicy;
+	private OrchestratorPolicy orchestratorPolicy;
 	private int numOfMobileDevice;
 	private NetworkModel networkModel;
 	private MobilityModel mobilityModel;
@@ -54,7 +54,7 @@ public class SimManager extends SimEntity {
 	
 	private static SimManager instance = null;
 	
-	public SimManager(ScenarioFactory _scenarioFactory, int _numOfMobileDevice, String _simScenario, String _orchestratorPolicy) throws Exception {
+	public SimManager(ScenarioFactory _scenarioFactory, int _numOfMobileDevice, String _simScenario, OrchestratorPolicy _orchestratorPolicy) throws Exception {
 		super("SimManager");
 		simScenario = _simScenario;
 		scenarioFactory = _scenarioFactory;
@@ -128,7 +128,7 @@ public class SimManager extends SimEntity {
 		return simScenario;
 	}
 
-	public String getOrchestratorPolicy(){
+	public OrchestratorPolicy getOrchestratorPolicy(){
 		return orchestratorPolicy;
 	}
 	
