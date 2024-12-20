@@ -27,12 +27,11 @@ public class Main {
         String edgeDevicesFile = "";
         String applicationsFile = "";
         String roadNodesFile;
+        String outFolderBase = "sim_results";
         if (args.length == 6) {
             configFile = args[0];
             edgeDevicesFile = args[1];
             applicationsFile = args[2];
-            outputFolder = args[3];
-            iterationNumber = Integer.parseInt(args[4]);
             roadNodesFile = args[5];
         } else {
             SimLogger.printLine("Simulation setting file, output folder and iteration number are not provided! Using default ones...");
@@ -40,12 +39,8 @@ public class Main {
             applicationsFile = "resources/config/applications.xml";
             edgeDevicesFile = "resources/config/edge_devices.xml";
             roadNodesFile = "resources/config/road_nodes.xml";
-            outputFolder = "sim_results/ite" + iterationNumber;
         }
-
-        Path path = Paths.get(outputFolder);
-        path.toFile().mkdirs();
-
+        Paths.get(outFolderBase).toFile().mkdirs();
 
         //load settings from configuration file
         SimSettings SS = SimSettings.getInstance();
@@ -56,7 +51,7 @@ public class Main {
 
         if (SS.getFileLoggingEnabled()) {
             SimLogger.enableFileLog();
-            SimUtils.cleanOutputFolder(outputFolder);
+            SimUtils.cleanOutputFolder(outFolderBase);
         }
 
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -66,6 +61,9 @@ public class Main {
         SimLogger.printLine("----------------------------------------------------------------------");
         for (int i = 1; i <= 10; i++) {
             iterationNumber = i;
+            outputFolder = outFolderBase + "/ite" + iterationNumber;
+            Path path = Paths.get(outputFolder);
+            path.toFile().mkdirs();
             for (int j = SS.getMinNumOfMobileDev(); j <= SS.getMaxNumOfMobileDev(); j += SS.getMobileDevCounterSize()) {
                 for (int k = 0; k < SS.getSimulationScenarios().length; k++) {
                     for (OrchestratorPolicy orchestratorPolicy : SS.getOrchestratorPolicies()) {
