@@ -64,10 +64,11 @@ public class Main {
         String now = df.format(SimulationStartDate);
         SimLogger.printLine("Simulation started at " + now);
         SimLogger.printLine("----------------------------------------------------------------------");
-
-        for (int j = SS.getMinNumOfMobileDev(); j <= SS.getMaxNumOfMobileDev(); j += SS.getMobileDevCounterSize()) {
-            for (int k = 0; k < SS.getSimulationScenarios().length; k++) {
-                for (OrchestratorPolicy orchestratorPolicy : SS.getOrchestratorPolicies()) {
+        for (int i = 1; i <= 10; i++) {
+            iterationNumber = i;
+            for (int j = SS.getMinNumOfMobileDev(); j <= SS.getMaxNumOfMobileDev(); j += SS.getMobileDevCounterSize()) {
+                for (int k = 0; k < SS.getSimulationScenarios().length; k++) {
+                    for (OrchestratorPolicy orchestratorPolicy : SS.getOrchestratorPolicies()) {
 
                         String simScenario = SS.getSimulationScenarios()[k];
 
@@ -77,7 +78,7 @@ public class Main {
                         SimLogger.printLine("Scenario started at " + now);
                         SimLogger.printLine("Scenario: " + simScenario + " - Policy: " + orchestratorPolicy + " - #iteration: " + iterationNumber);
                         SimLogger.printLine("Duration: " + SS.getSimulationTime() / 3600 + " hour(s) - Poisson: " + SS.getTaskLookUpTable()[0][2] + " - #devices: " + j);
-                        SimLogger.getInstance().simStarted(outputFolder, "SIMRESULT_" + simScenario + "_" + orchestratorPolicy + "_"  + j + "DEVICES");
+                        SimLogger.getInstance().simStarted(outputFolder, "SIMRESULT_" + simScenario + "_" + orchestratorPolicy + "_" + j + "DEVICES");
 
                         try {
                             // First step: Initialize the CloudSim package. It should be called
@@ -90,7 +91,7 @@ public class Main {
                             CloudSim.init(num_user, calendar, trace_flag, 0.01);
 
                             // Generate EdgeCloudsim Scenario Factory
-                            ScenarioFactory sampleFactory = new VehicularScenarioFactory(j, SS.getSimulationTime(),  simScenario, orchestratorPolicy);
+                            ScenarioFactory sampleFactory = new VehicularScenarioFactory(j, SS.getSimulationTime(), simScenario, orchestratorPolicy);
 
                             // Generate EdgeCloudSim Simulation Manager
                             SimManager manager = new SimManager(sampleFactory, j, simScenario, orchestratorPolicy);
@@ -108,9 +109,10 @@ public class Main {
                         SimLogger.printLine("Scenario finished at " + now + ". It took " + SimUtils.getTimeDifference(ScenarioStartDate, ScenarioEndDate));
                         SimLogger.printLine("----------------------------------------------------------------------");
 
-                }//End of orchestrators loop
-            }//End of scenarios loop
-        }//End of mobile devices loop
+                    }//End of orchestrators loop
+                }//End of scenarios loop
+            }//End of mobile devices loop
+        }//End of iterations loop
 
         Date SimulationEndDate = Calendar.getInstance().getTime();
         now = df.format(SimulationEndDate);
