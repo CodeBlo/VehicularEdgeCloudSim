@@ -11,7 +11,7 @@ import java.util.*;
 
 public class VehicularMobility extends MobilityModel {
 
-    public static final int CAR_SPEED = 30; //km/h
+    public static final double CAR_SPEED = 5.55556; //meter/second
     private final Map<Integer, Car> carMap = new HashMap<>();
     private final Map<Integer, RoadNode> roadNodeMap = generateRoadNetwork();
 
